@@ -1,3 +1,4 @@
+#include <crypto/util.h>
 #include "aes.h"
 
 CryptoAESParameters * crypto_aes_create(const unsigned char* key, const unsigned char* iv) {
@@ -17,9 +18,11 @@ CryptoAESParameters * crypto_aes_create(const unsigned char* key, const unsigned
   }
 
   CryptoAESParameters * out = (CryptoAESParameters *)malloc(sizeof(CryptoAESParameters));
+  out->encrypt = c_new(EVP_CIPHER_CTX);
+  out->decrypt = c_new(EVP_CIPHER_CTX);
 
   EVP_CIPHER_CTX_init(out->encrypt);
-  EVP_EncryptInit_ex(out->encrypt, mode, NULL, key, iv);
+  EVP_EncryptInit(out->encrypt, mode, key, iv);
   EVP_CIPHER_CTX_init(out->decrypt);
   EVP_DecryptInit(out->decrypt, mode, key, iv);
 
