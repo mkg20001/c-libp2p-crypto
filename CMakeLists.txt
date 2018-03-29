@@ -3,24 +3,16 @@ project(c_libp2p_crypto C)
 
 set(CMAKE_C_STANDARD 99)
 
-FIND_PACKAGE(Protobuf REQUIRED)
-INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
-
 find_package(OpenSSL REQUIRED)
 INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
 
-# set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-# set(CMAKE_CXX_STANDARD 11)
-# set(protobuf_BUILD_TESTS OFF)
-# add_subdirectory(protobuf/cmake)
-# add_subdirectory(protobuf-c/build-cmake)
 include(protobuf-c.cmake)
 
 set(LIBP2P_CRYPTO_SRC
         crypto/aes/aes.c
         crypto/aes/aes.h
-        crypto/util.h
         crypto/util.c
+        crypto/util.h
         crypto/keys/common.h
         crypto/keys/keys.c
         crypto/keys/keys.h
@@ -31,7 +23,7 @@ set(LIBP2P_CRYPTO_SRC
 set_source_files_properties(
         ${LIBP2P_CRYPTO_SRC}
         PROPERTIES
-        COMPILE_FLAGS "${WERROR_COMMON_FLAGS}"
+        COMPILE_FLAGS "-Werror"
 )
 
 set(LIBP2P_CRYPTO_SRC_FULL
@@ -61,6 +53,19 @@ foreach(proto_file ${PROTOS})
     compile_proto_file(${proto_file})
 endforeach(proto_file)
 
-add_library(c_libp2p_crypto ${LIBP2P_CRYPTO_SRC_FULL})
+add_library(c_libp2p_crypto SHARED ${LIBP2P_CRYPTO_SRC_FULL})
+target_link_libraries(c_libp2p_crypto ${OPENSSL_LIBRARIES})
 
-include(tests.cmake)
+include(gtest.cmake)
+
+set(TEST_FILES
+        test/crypto/aes.cpp)
+
+add_executable(crypto_test test/main.cpp ${TEST_FILES})
+
+target_link_libraries(crypto_test
+        c_libp2p_crypto
+        libgtest
+        libgmock)
+
+install(TARGETS crypto_test DESTINATION bin)

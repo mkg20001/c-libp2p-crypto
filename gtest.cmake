@@ -1,7 +1,5 @@
 # Ref http://www.kaizou.org/2014/11/gtest-cmake/
 
-project(crypto_tests)
-
 # We need thread support
 find_package(Threads REQUIRED)
 
@@ -44,18 +42,3 @@ set_target_properties(libgmock PROPERTIES
 # I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
 include_directories("${source_dir}/googletest/include"
         "${source_dir}/googlemock/include")
-
-# Actual tests
-
-set(TEST_FILES
-        test/main.cpp)
-
-add_executable(crypto_test test/main.cpp)
-
-target_link_libraries(crypto_test
-        c_libp2p_crypto
-        libgtest
-        libgmock
-        )
-
-install(TARGETS crypto_test DESTINATION bin)

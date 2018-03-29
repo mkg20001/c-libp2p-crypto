@@ -1,4 +1,3 @@
-// js-libp2p-crypto/aes stuff
 #include "aes.h"
 
 CryptoAESParameters * crypto_aes_create(const unsigned char* key, const unsigned char* iv) {
