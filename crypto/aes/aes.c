@@ -1,7 +1,7 @@
 #include <crypto/util.h>
 #include "aes.h"
 
-CryptoAESParameters * crypto_aes_create(const unsigned char* key, const unsigned char* iv) {
+CryptoAESParameters * aes_create(const unsigned char* key, const unsigned char* iv) {
   const EVP_CIPHER *mode;
   switch(strlen((const char *)key)) {
     case 16: {
