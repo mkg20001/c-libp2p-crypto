@@ -1,0 +1,3 @@
+*.bak
+*.pb-c*
+cmake-build-debug
