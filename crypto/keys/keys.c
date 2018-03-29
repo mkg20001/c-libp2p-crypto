@@ -25,7 +25,7 @@ Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data) {
   out->type = privKey->type;
   switch(privKey->type) {
     case KEY_TYPE__RSA: {
-      out->data = rsa_unmarshal_public_key(privKey->data);
+      rsa_unmarshal_private_key(privKey->data, out);
       return out;
     }
     case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: {

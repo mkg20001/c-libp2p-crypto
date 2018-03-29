@@ -62,3 +62,5 @@ foreach(proto_file ${PROTOS})
 endforeach(proto_file)
 
 add_library(c_libp2p_crypto ${LIBP2P_CRYPTO_SRC_FULL})
+
+include(tests.cmake)
