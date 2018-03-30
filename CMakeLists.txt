@@ -62,7 +62,8 @@ target_link_libraries(c_libp2p_crypto ${OPENSSL_LIBRARIES})
 include(gtest.cmake)
 
 set(TEST_FILES
-        test/crypto/aes.cpp)
+        test/crypto/aes.cpp
+        test/crypto/keys_rsa.cpp)
 
 add_executable(crypto_test test/main.cpp ${TEST_FILES})
 
