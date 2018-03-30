@@ -6,7 +6,10 @@ set(CMAKE_C_STANDARD 99)
 find_package(OpenSSL REQUIRED)
 INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
 
-include(protobuf-c.cmake)
+if (NOT_INCLUDE_PROTOBUF_C)
+else()
+    include(protobuf-c.cmake)
+endif()
 
 set(LIBP2P_CRYPTO_SRC
         crypto/aes/aes.c
