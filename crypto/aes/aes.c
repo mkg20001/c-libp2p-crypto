@@ -31,6 +31,13 @@ AES_CTX * aes_create(const unsigned char* key, const unsigned char* iv) {
   return out;
 }
 
+void aes_free(AES_CTX * ctx) {
+  if (ctx == NULL) return;
+  if (ctx->encrypt != NULL) EVP_CIPHER_CTX_free(ctx->encrypt);
+  if (ctx->decrypt != NULL) EVP_CIPHER_CTX_free(ctx->decrypt);
+  free(ctx);
+}
+
 char * aes_decrypt_update(AES_CTX * _ctx, unsigned char * cipher, size_t cipher_len, size_t * outlen) {
   EVP_CIPHER_CTX *ctx = _ctx->decrypt;
   unsigned char * plain = (unsigned char *)malloc(cipher_len + 256);

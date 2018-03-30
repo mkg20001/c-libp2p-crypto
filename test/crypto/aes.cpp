@@ -8,6 +8,7 @@ TEST(AES, init) {
   AES_CTX *ctx = NULL;
   ASSERT_NO_FATAL_FAILURE(ctx = aes_create((const unsigned char *)"1234567890123456", (const unsigned char *)"1234567890123456"));
   ASSERT_TRUE(ctx);
+  ASSERT_NO_FATAL_FAILURE(aes_free(ctx));
 }
 
 TEST(AES, encryption_decryption) {

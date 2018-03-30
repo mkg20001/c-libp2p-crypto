@@ -31,3 +31,7 @@ The libp2p-crypto library ported to C
 Creates a new AES context with the key and initialization vector
 
 AES mode is determined by the key size (16=aes-128-ctr, 32=aes-256-ctr)
+
+`void aes_free(AES_CTX * ctx)`
+
+Frees an AES context
