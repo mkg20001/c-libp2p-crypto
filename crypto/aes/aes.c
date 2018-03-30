@@ -43,7 +43,7 @@ void aes_free(AES_CTX * ctx) {
   free(ctx);
 }
 
-AES_RES * aes_init_res() {
+AES_RES * init_res() {
   AES_RES * r = c_new(AES_RES);
   r->len = 0;
   r->alloc = 0;
@@ -53,18 +53,19 @@ unsigned char * aes_get_result(AES_RES * res) { // will get cur res->res and re-
   if (!res->len) {
     free(res->res);
     free(res);
-    res = aes_init_res();
+    res = init_res();
     return (unsigned char *)"";
   }
   unsigned char * r = res->res;
   r[res->len] = '\0'; // add null terminator
   free(res);
-  res = aes_init_res();
+  res = init_res();
   return res->res;
 }
 
 void extend_res(AES_RES * res, size_t wanted) { // re-malloc res->res to wanted bytes
   if (res->alloc >= wanted) return; // already big enough
+  wanted += 512; // increase wanted by 512 so it does not need to be extended too often
   unsigned char * cur = res->res;
   res->alloc = wanted;
   res->res = (unsigned char *)malloc(wanted);
