@@ -16,18 +16,15 @@ TEST(AES, encryption_decryption) {
   AES_CTX *ctx = aes_create((const unsigned char *)"1234567890123456", (const unsigned char *)"1234567890123456");
   ASSERT_TRUE(ctx);
 
-  size_t len = 0;
-  char cipher[200];
-  strcpy(cipher, aes_encrypt_update(ctx, plaintext, strlen("The quick brown fox jumps over the lazy dog"), &len));
-  strcat(cipher, aes_encrypt_final(ctx, &len));
-  ASSERT_TRUE(cipher);
+  ASSERT_FALSE(aes_encrypt_update(ctx, plaintext, strlen("The quick brown fox jumps over the lazy dog")));
+  ASSERT_FALSE(aes_encrypt_final(ctx));
 
-  size_t len2 = 0;
-  char decipher[200];
-  strcpy(decipher, aes_decrypt_update(ctx, (unsigned char *)decipher, len, &len2));
-  strcat(decipher, aes_decrypt_final(ctx, &len2));
-  fprintf(stderr, (char *)plaintext);
-  fprintf(stderr, "\n!=\n");
-  fprintf(stderr, (char *)decipher);
-  ASSERT_EQ(plaintext, (unsigned char *)decipher);
+  size_t len = ctx->encRes->len;
+  unsigned char * cipher = aes_get_result(ctx->encRes);
+
+  ASSERT_FALSE(aes_decrypt_update(ctx, cipher, len));
+  ASSERT_FALSE(aes_decrypt_final(ctx));
+
+  unsigned char * decipher = aes_get_result(ctx->decRes);
+  ASSERT_TRUE(strcmp((char *)plaintext, (char *)decipher));
 }
