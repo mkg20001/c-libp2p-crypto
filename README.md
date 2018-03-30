@@ -21,3 +21,13 @@ The libp2p-crypto library ported to C
     - [ ] [`marshalPrivateKey(key[, type])`](#marshalprivatekeykey-type)
     - [ ] [`unmarshalPrivateKey(buf, callback)`](#unmarshalprivatekeybuf-callback)
     - [ ] [`import(pem, password, callback)`](#importpem-password-callback)
+
+## API
+
+###  `<aes.h>`
+
+`AES_CTX * aes_create(const unsigned char * key, const unsigned char key *)`
+
+Creates a new AES context with the key and initialization vector
+
+AES mode is determined by the key size (16=aes-128-ctr, 32=aes-256-ctr)

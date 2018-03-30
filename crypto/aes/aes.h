@@ -3,9 +3,13 @@
 #include <openssl/evp.h>
 #include <string.h>
 
-typedef struct _CryptoAESParameters {
+typedef struct _AES_CTX {
   EVP_CIPHER_CTX* encrypt;
   EVP_CIPHER_CTX* decrypt;
-} CryptoAESParameters;
+} AES_CTX;
 
-CryptoAESParameters * crypto_aes_create(const unsigned char* key, const unsigned char* iv);
+AES_CTX * aes_create(const unsigned char* key, const unsigned char* iv);
+char * aes_decrypt_update(AES_CTX * _ctx, unsigned char * cipher, size_t cipher_len, size_t * outlen);
+char * aes_decrypt_final(AES_CTX * _ctx, size_t * outlen);
+char * aes_encrypt_update(AES_CTX * _ctx, unsigned char * plain, size_t plain_len, size_t * outlen);
+char * aes_encrypt_final(AES_CTX * _ctx, size_t * outlen);
