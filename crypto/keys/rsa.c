@@ -24,6 +24,7 @@ int rsa_unmarshal_public_key(ProtobufCBinaryData data, Libp2pPubKey * out) { // 
   BIO * keybio = pkcs1_to_pem(data);
   if (keybio == NULL) return 1;
   rsa = PEM_read_bio_RSAPublicKey(keybio, &rsa, NULL, NULL);
+  BIO_free_all(keybio);
   if (rsa == NULL) return 1;
   out->data = (const void *) rsa;
   return 0;
@@ -34,7 +35,9 @@ int rsa_unmarshal_private_key(ProtobufCBinaryData data, Libp2pPrivKey * out) { /
   BIO * keybio = pkcs1_to_pem(data);
   if (keybio == NULL) return 1;
   rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa, NULL, NULL);
+  BIO_free_all(keybio);
   if (rsa == NULL) return 1;
   out->data = (const void *) rsa;
+  out->pubKey->data = (const void *) rsa;
   return 0;
 }

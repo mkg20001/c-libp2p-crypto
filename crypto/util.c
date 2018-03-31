@@ -17,7 +17,7 @@ ProtobufCBinaryData fromHex(const char * hex) {
 
   data.data = malloc(len + 1);
   for (int i = 0; i < len; ++i) {
-    char * c = (char *)malloc(2);
+    char * c = (char *)malloc(3);
     memcpy(c, hex + i * 2, 2);
     c[2] = '\0';
     uint8_t c2 = (uint8_t)strtol(c, NULL, 16);

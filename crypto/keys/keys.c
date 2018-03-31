@@ -6,18 +6,22 @@ Libp2pPubKey * unmarshal_public_key(ProtobufCBinaryData data) {
   if (pubKey == NULL) return NULL; // TODO: intelligent error handling
   Libp2pPubKey * out = c_new(Libp2pPubKey);
   out->type = pubKey->type;
+  int err;
   switch(pubKey->type) {
     case KEY_TYPE__RSA: {
-      rsa_unmarshal_public_key(pubKey->data, out);
-      return out;
+      err = rsa_unmarshal_public_key(pubKey->data, out);
+      break;
     }
-    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: {
-      return NULL; // TODO: add
-    }
-    default: {
-      return NULL; // TODO: intelligent error handling
+    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
+      goto free_and_stop;
     }
   }
+  if (err) goto free_and_stop;
+  return out;
+
+  free_and_stop:
+    free(out);
+    return NULL;
 }
 
 Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data) {
@@ -26,16 +30,21 @@ Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data) {
   Libp2pPrivKey * out = c_new(Libp2pPrivKey);
   out->pubKey = c_new(Libp2pPubKey);
   out->type = privKey->type;
+  int err;
   switch(privKey->type) {
     case KEY_TYPE__RSA: {
-      if (rsa_unmarshal_private_key(privKey->data, out)) return NULL;
-      return out;
+      err = rsa_unmarshal_private_key(privKey->data, out);
+      break;
     }
-    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: {
-      return NULL; // TODO: add
-    }
-    default: {
-      return NULL; // TODO: intelligent error handling
+    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
+      goto free_and_stop;
     }
   }
+  if (err) goto free_and_stop;
+  return out;
+
+  free_and_stop: // TODO: intelligent error handling
+    free(out->pubKey);
+    free(out);
+    return NULL;
 }
