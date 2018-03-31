@@ -12,4 +12,6 @@ TEST(Keys, LoadKey) {
   ASSERT_TRUE(key.data);
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
   ASSERT_TRUE(privKey);
+  EXPECT_TRUE((RSA *) privKey->data);
+  EXPECT_TRUE(privKey->type == KEY_TYPE__RSA);
 }
