@@ -46,7 +46,7 @@ The libp2p-crypto library ported to C
 
 ######  `int aes_encrypt_final(AES_CTX * _ctx)`
 
-> Finalizes the encryption and stores the result in `_ctx->decRes`
+> Finalizes the encryption and stores the result in `_ctx->encRes`
 
 ###### `void aes_free(AES_CTX * ctx)`
 

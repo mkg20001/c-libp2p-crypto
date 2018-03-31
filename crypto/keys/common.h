@@ -10,6 +10,6 @@ typedef struct _Libp2pPubKey {
 typedef struct _Libp2pPrivKey {
     KeyType type;
     const void * data;
-    Libp2pPubKey pubKey;
+    Libp2pPubKey * pubKey;
 } Libp2pPrivKey;
 #endif
