@@ -83,3 +83,15 @@ int rsa_marshal_private_key(Libp2pPrivKey * key, ProtobufCBinaryData out) {
 }
 
 /* --- free --- */
+
+void rsa_free_public_key_data(Libp2pPubKey * key) {
+  if (key->data == NULL) return;
+  RSA * rsa = (RSA *) key->data;
+  RSA_free(rsa);
+}
+
+void rsa_free_private_key_data(Libp2pPrivKey * key) {
+  if (key->data == NULL) return;
+  RSA * rsa = (RSA *) key->data;
+  RSA_free(rsa);
+}

@@ -119,13 +119,27 @@ ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key) {
 
 void free_public_key(Libp2pPubKey * key) {
   if (key == NULL) return;
-  // TODO: free key->data
+
+  switch(key->type) {
+    case KEY_TYPE__RSA: {
+      rsa_free_public_key_data((void *) key->data);
+      break;
+    }
+  }
+
   free(key);
 }
 
 void free_private_key(Libp2pPrivKey * key) {
   if (key == NULL) return;
-  // TODO: free key->data
   free_public_key(key->pubKey);
+
+  switch(key->type) {
+    case KEY_TYPE__RSA: {
+      rsa_free_private_key_data((void *) key->data);
+      break;
+    }
+  }
+
   free(key);
 }
