@@ -1,6 +1,8 @@
 #include <crypto/util.h>
 #include "keys.h"
 
+/* --- unmarshal --- */
+
 Libp2pPubKey * unmarshal_public_key(ProtobufCBinaryData data) {
   PublicKey * pubKey = public_key__unpack(NULL, data.len, data.data);
   if (pubKey == NULL) return NULL; // TODO: intelligent error handling
@@ -61,18 +63,7 @@ Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data) {
     return NULL;
 }
 
-void free_public_key(Libp2pPubKey * key) {
-  if (key == NULL) return;
-  // TODO: free key->data
-  free(key);
-}
-
-void free_private_key(Libp2pPrivKey * key) {
-  if (key == NULL) return;
-  // TODO: free key->data
-  free_public_key(key->pubKey);
-  free(key);
-}
+/* --- marshal --- */
 
 ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key) {
   ProtobufCBinaryData data;
@@ -95,7 +86,7 @@ ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key) {
   return data;
 
   free_and_stop:
-    if (data.data != NULL) free(data.data);
+    free_data(data);
     return data;
 }
 
@@ -120,9 +111,21 @@ ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key) {
   return data;
 
   free_and_stop:
-    if (data.data != NULL) {
-      free(data.data);
-      data.data = NULL;
-    }
+    free_data(data);
     return data;
+}
+
+/* --- free --- */
+
+void free_public_key(Libp2pPubKey * key) {
+  if (key == NULL) return;
+  // TODO: free key->data
+  free(key);
+}
+
+void free_private_key(Libp2pPrivKey * key) {
+  if (key == NULL) return;
+  // TODO: free key->data
+  free_public_key(key->pubKey);
+  free(key);
 }

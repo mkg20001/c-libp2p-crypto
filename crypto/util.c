@@ -40,7 +40,7 @@ char * toHex(ProtobufCBinaryData data) {
   for (int i = 0; i < data.len; ++i) {
     sprintf(out + i * 2, "%02X", data.data[i]);
   }
-  out[data.len * 2 + 1] = '\0';
+  out[data.len * 2] = '\0';
 
   return out;
 }
@@ -52,7 +52,7 @@ char * Base64Encode(const unsigned char* buffer, size_t length) { //Encodes a bi
   BUF_MEM *bufferPtr;
 
   b64 = BIO_new(BIO_f_base64());
-  bio = BIO_new(BIO_s_mem());
+  bio = BIO_new(BIO_s_mem()); // TODO: fix leak
   bio = BIO_push(b64, bio);
 
   BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
@@ -106,4 +106,11 @@ ProtobufCBinaryData base64Decode(char * base64) {
   out.data = NULL;
   if (Base64Decode(base64, &out.data, &out.len)) return out;
   return out;
+}
+
+void free_data(ProtobufCBinaryData data) {
+  if (data.data != NULL) {
+    free(data.data);
+    data.data = NULL;
+  }
 }

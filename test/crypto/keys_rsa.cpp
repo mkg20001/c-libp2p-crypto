@@ -9,7 +9,9 @@ extern "C" {
 
 TEST(Keys, LoadKey) {
   ProtobufCBinaryData key = fromHex(HEX_KEY);
-  ASSERT_FALSE(strcmp(HEX_KEY, toHex(key)));
+  char * hex = toHex(key);
+  ASSERT_FALSE(strcmp(HEX_KEY, hex));
+  free(hex);
   ASSERT_TRUE(key.data);
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
   ASSERT_TRUE(privKey);
