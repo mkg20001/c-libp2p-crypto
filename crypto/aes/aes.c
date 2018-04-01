@@ -1,6 +1,13 @@
 #include <crypto/util.h>
 #include "aes.h"
 
+AES_RES * init_res() {
+  AES_RES * r = c_new(AES_RES);
+  r->len = 0;
+  r->alloc = 0;
+  r->res = NULL;
+}
+
 AES_CTX * aes_create(const unsigned char* key, const unsigned char* iv) {
   const EVP_CIPHER *mode;
   switch(strlen((const char *)key)) {
@@ -28,8 +35,8 @@ AES_CTX * aes_create(const unsigned char* key, const unsigned char* iv) {
   EVP_CIPHER_CTX_init(out->decrypt);
   EVP_DecryptInit(out->decrypt, mode, key, iv);
 
-  out->encRes = c_new(AES_RES);
-  out->decRes = c_new(AES_RES);
+  out->encRes = init_res();
+  out->decRes = init_res();
 
   return out;
 }
@@ -43,24 +50,18 @@ void aes_free(AES_CTX * ctx) {
   free(ctx);
 }
 
-AES_RES * init_res() {
-  AES_RES * r = c_new(AES_RES);
-  r->len = 0;
-  r->alloc = 0;
-}
-
 unsigned char * aes_get_result(AES_RES * res) { // will get cur res->res and re-create
+  unsigned char * r;
   if (!res->len) {
-    free(res->res);
-    free(res);
-    res = init_res();
-    return (unsigned char *)"";
+    r = res->res = (unsigned char *)"";
+  } else {
+    r = res->res;
   }
-  unsigned char * r = res->res;
   r[res->len] = '\0'; // add null terminator
-  free(res);
-  res = init_res();
-  return res->res;
+  res->len = 0;
+  res->alloc = 0;
+  res->res = NULL;
+  return r;
 }
 
 void extend_res(AES_RES * res, size_t wanted) { // re-malloc res->res to wanted bytes
