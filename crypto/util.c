@@ -40,7 +40,7 @@ char * toHex(ProtobufCBinaryData data) {
   for (int i = 0; i < data.len; ++i) {
     sprintf(out + i * 2, "%02X", data.data[i]);
   }
-  out[data.len] = '\0';
+  out[data.len * 2 + 1] = '\0';
 
   return out;
 }
