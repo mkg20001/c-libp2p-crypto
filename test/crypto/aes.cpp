@@ -26,5 +26,9 @@ TEST(AES, encryption_decryption) {
   ASSERT_FALSE(aes_decrypt_final(ctx));
 
   unsigned char * decipher = aes_get_result(ctx->decRes);
-  ASSERT_TRUE(strcmp((char *)plaintext, (char *)decipher));
+  ASSERT_FALSE(strcmp((char *)plaintext, (char *)decipher));
+
+  aes_free(ctx);
+  free(cipher);
+  free(decipher);
 }

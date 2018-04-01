@@ -11,14 +11,15 @@ TEST(Keys, LoadKey) {
   ProtobufCBinaryData key = fromHex(HEX_KEY);
   char * hex = toHex(key);
   ASSERT_FALSE(strcmp(HEX_KEY, hex));
-  free(hex);
   ASSERT_TRUE(key.data);
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
   ASSERT_TRUE(privKey);
   EXPECT_TRUE((RSA *) privKey->data);
   EXPECT_TRUE(privKey->type == KEY_TYPE__RSA);
+
+  free(hex);
   free_private_key(privKey);
-  free(key.data);
+  free_data(key);
 }
 
 TEST(Keys, LoadAndStore) {
@@ -26,9 +27,16 @@ TEST(Keys, LoadAndStore) {
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
   ProtobufCBinaryData mkey = marshal_private_key(privKey);
   ASSERT_TRUE(mkey.data);
-  ASSERT_FALSE(strcmp(HEX_KEY, toHex(mkey)));
+  char * hex = toHex(mkey);
+  ASSERT_FALSE(strcmp(HEX_KEY, hex));
+
+  free_private_key(privKey);
+  free_data(mkey);
+  free(hex);
 }
 
-TEST(Keys, Sign) {
+TEST(Keys, Sign) { // TODO: add
   Libp2pPrivKey * privKey = unmarshal_private_key(fromHex(HEX_KEY));
+
+  free_private_key(privKey);
 }
