@@ -24,6 +24,8 @@ TEST(Keys, LoadKey) {
 
 TEST(Keys, LoadAndStore) {
   ProtobufCBinaryData key = fromHex(HEX_KEY);
+  char * hex_ = toHex(key); // TODO: figure out why this fails if those 2 lines are missing. or why it sometimes randomly segfaults.
+  ASSERT_FALSE(strcmp(HEX_KEY, hex_));
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
   ASSERT_TRUE(privKey);
   ProtobufCBinaryData mkey = marshal_private_key(privKey);

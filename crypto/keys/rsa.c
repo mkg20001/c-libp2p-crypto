@@ -14,7 +14,7 @@ typedef enum _KeyLevel {
   KEY_PUBLIC = 1
 } KeyLevel;
 
-RSA * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
+char * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
   char * pemPrefix;
   char * pemSuffix;
   switch(l) {
@@ -38,10 +38,15 @@ RSA * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
   strcat(str, b64);
   strcat(str, pemSuffix);
   str[strlen(pemPrefix) + strlen(pemSuffix) + strlen(b64)] = '\0';
+  free((void *)b64);
+  return str;
+}
+
+RSA * pem_to_rsa(char * str, KeyLevel l) {
+  if (l != KEY_PRIVATE && l != KEY_PUBLIC) return NULL;
+
   BIO * keybio = BIO_new_mem_buf((void*)str, -1);
   if (keybio == NULL) {
-    free(str);
-    free((void *)b64);
     return NULL;
   }
   RSA * rsa = NULL;
@@ -55,18 +60,12 @@ RSA * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
       break;
     }
   }
-  free(str);
-  free((void *)b64);
   BIO_free_all(keybio);
   return rsa;
 }
 
-ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
-  ProtobufCBinaryData data;
-  data.len = 0;
-  data.data = NULL;
-
-  if (l != KEY_PRIVATE && l != KEY_PUBLIC) return data;
+char * rsa_to_pem(RSA * rsa, KeyLevel l) {
+  if (l != KEY_PRIVATE && l != KEY_PUBLIC) return NULL;
 
   BIO *bio;
   BUF_MEM *bufferPtr;
@@ -91,7 +90,15 @@ ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
   BIO_set_close(bio, BIO_NOCLOSE);
   BIO_free_all(bio);
 
-  char * pem = (*bufferPtr).data;
+  return (*bufferPtr).data;
+}
+
+ProtobufCBinaryData pem_to_pkcs1(char * pem, KeyLevel l) {
+  ProtobufCBinaryData data;
+  data.len = 0;
+  data.data = NULL;
+
+  if (l != KEY_PRIVATE && l != KEY_PUBLIC) return data;
 
   char * pemPrefix;
   char * pemSuffix;
@@ -114,7 +121,6 @@ ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
   memcpy(b64, pem + strlen(pemPrefix), len);
   b64[len] = '\0';
 
-  free(pem);
   char * b64stripped = malloc(len);
 
   strip_newline(b64, b64stripped);
@@ -128,14 +134,20 @@ ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
 /* --- unmarshal --- */
 
 int rsa_unmarshal_public_key(ProtobufCBinaryData data, Libp2pPubKey * out) { // convert pkcs1 buffer to PEM to openssl RSA public key encoded in libp2p pub key
-  RSA *rsa = pkcs1_to_pem(data, KEY_PUBLIC);
+  char * pem = pkcs1_to_pem(data, KEY_PUBLIC);
+  if (pem == NULL) return 1;
+  RSA *rsa = pem_to_rsa(pem, KEY_PUBLIC);
   if (rsa == NULL) return 1;
+  free(pem);
   out->data = (const void *) rsa;
   return 0;
 }
 
 int rsa_unmarshal_private_key(ProtobufCBinaryData data, Libp2pPrivKey * out) { // convert pkcs1 buffer to PEM to openssl RSA private key encoded in libp2p priv key
-  RSA *rsa = pkcs1_to_pem(data, KEY_PRIVATE);
+  char * pem = pkcs1_to_pem(data, KEY_PRIVATE);
+  if (pem == NULL) return 1;
+  RSA *rsa = pem_to_rsa(pem, KEY_PRIVATE);
+  free(pem);
   if (rsa == NULL) return 1;
   out->data = (const void *) rsa;
   out->pubKey->data = (const void *) rsa;
@@ -146,7 +158,10 @@ int rsa_unmarshal_private_key(ProtobufCBinaryData data, Libp2pPrivKey * out) { /
 
 int rsa_marshal_public_key(Libp2pPubKey * key, ProtobufCBinaryData * out) {
   RSA *rsa = (RSA *) key->data;
-  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PUBLIC);
+  char * pem = rsa_to_pem(rsa, KEY_PUBLIC);
+  if (pem == NULL) return 1;
+  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(pem, KEY_PUBLIC);
+  free(pem);
   if (pkcs1.data == NULL) return 1;
   out->data = pkcs1.data;
   out->len = pkcs1.len;
@@ -155,7 +170,10 @@ int rsa_marshal_public_key(Libp2pPubKey * key, ProtobufCBinaryData * out) {
 
 int rsa_marshal_private_key(Libp2pPrivKey * key, ProtobufCBinaryData * out) {
   RSA * rsa = (RSA * ) key->data;
-  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PRIVATE);
+  char * pem = rsa_to_pem(rsa, KEY_PRIVATE);
+  if (pem == NULL) return 1;
+  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(pem, KEY_PRIVATE);
+  free(pem);
   if (pkcs1.data == NULL) return 1;
   out->data = pkcs1.data;
   out->len = pkcs1.len;
