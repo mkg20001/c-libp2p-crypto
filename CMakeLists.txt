@@ -26,7 +26,7 @@ set(LIBP2P_CRYPTO_SRC
 set_source_files_properties(
         ${LIBP2P_CRYPTO_SRC}
         PROPERTIES
-        COMPILE_FLAGS "-Werror"
+        COMPILE_FLAGS "-Werror=all"
 )
 
 set(LIBP2P_CRYPTO_SRC_FULL

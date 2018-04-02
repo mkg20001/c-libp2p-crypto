@@ -1,6 +1,12 @@
 #include <crypto/util.h>
 #include "aes.h"
 
+/* -- prototypes --- */
+
+AES_RES * init_res();
+void extend_res(AES_RES * res, size_t wanted);
+void free_res(AES_RES * res);
+
 /* --- utils for AES_RES --- */
 
 AES_RES * init_res() {
@@ -8,6 +14,7 @@ AES_RES * init_res() {
   r->len = 0;
   r->alloc = 0;
   r->res = NULL;
+  return r;
 }
 
 void extend_res(AES_RES * res, size_t wanted) { // re-malloc res->res to wanted bytes

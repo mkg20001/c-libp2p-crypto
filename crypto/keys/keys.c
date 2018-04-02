@@ -138,6 +138,9 @@ void free_public_key(Libp2pPubKey * key) {
       rsa_free_public_key_data((void *) key->data);
       break;
     }
+    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: {
+      free((void *) key->data); // just try to free it
+    }
   }
 
   free(key);
@@ -151,6 +154,9 @@ void free_private_key(Libp2pPrivKey * key) {
     case KEY_TYPE__RSA: {
       rsa_free_private_key_data((void *) key->data);
       break;
+    }
+    case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: {
+      free((void *) key->data); // just try to free it
     }
   }
 

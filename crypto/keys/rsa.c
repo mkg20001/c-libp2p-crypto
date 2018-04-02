@@ -7,12 +7,19 @@
 #define PEM_PUBLIC_PREFIX "-----BEGIN RSA PUBLIC KEY-----\n"
 #define PEM_PUBLIC_SUFFIX "\n-----END RSA PUBLIC KEY-----"
 
-/* --- PKCS1 <-> PEM --- */
-
 typedef enum _KeyLevel {
   KEY_PRIVATE = 0,
   KEY_PUBLIC = 1
 } KeyLevel;
+
+/* --- prototypes --- */
+
+char * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l);
+RSA * pem_to_rsa(char * str, KeyLevel l);
+char * rsa_to_pem(RSA * rsa, KeyLevel l);
+ProtobufCBinaryData pem_to_pkcs1(char * pem, KeyLevel l);
+
+/* --- PKCS1 <-> PEM --- */
 
 char * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
   char * pemPrefix;
