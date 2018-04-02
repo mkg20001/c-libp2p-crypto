@@ -25,12 +25,14 @@ TEST(Keys, LoadKey) {
 TEST(Keys, LoadAndStore) {
   ProtobufCBinaryData key = fromHex(HEX_KEY);
   Libp2pPrivKey * privKey = unmarshal_private_key(key);
+  ASSERT_TRUE(privKey);
   ProtobufCBinaryData mkey = marshal_private_key(privKey);
   ASSERT_TRUE(mkey.data);
   char * hex = toHex(mkey);
   ASSERT_FALSE(strcmp(HEX_KEY, hex));
 
   free_private_key(privKey);
+  free_data(key);
   free_data(mkey);
   free(hex);
 }

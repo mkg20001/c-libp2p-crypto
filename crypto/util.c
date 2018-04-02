@@ -56,7 +56,7 @@ char * Base64Encode(const unsigned char* buffer, size_t length) { //Encodes a bi
   bio = BIO_push(b64, bio);
 
   BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
-  BIO_write(bio, buffer, length);
+  BIO_write(bio, buffer, (int)length);
   BIO_flush(bio);
   BIO_get_mem_ptr(bio, &bufferPtr);
   BIO_set_close(bio, BIO_NOCLOSE);

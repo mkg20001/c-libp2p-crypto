@@ -39,6 +39,7 @@ Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data) {
   Libp2pPrivKey * out = c_new(Libp2pPrivKey);
   out->pubKey = c_new(Libp2pPubKey);
   out->type = privKey->type;
+  out->pubKey->type = privKey->type;
 
   int err;
 
@@ -69,6 +70,7 @@ ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key) {
   ProtobufCBinaryData data;
   data.data = NULL;
   data.len = 0;
+  if (key == NULL) return data;
 
   int err;
 
@@ -78,7 +80,7 @@ ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key) {
       break;
     }
     case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
-      goto free_and_stop;
+      err = 1;
     }
   }
 
@@ -94,6 +96,7 @@ ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key) {
   ProtobufCBinaryData data;
   data.data = NULL;
   data.len = 0;
+  if (key == NULL) return data;
 
   int err;
 
@@ -103,12 +106,22 @@ ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key) {
       break;
     }
     case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
-      goto free_and_stop;
+      err = 1;
     }
   }
 
   if (err) goto free_and_stop;
-  return data;
+
+  PrivateKey out = PRIVATE_KEY__INIT;
+  out.type = key->type;
+  out.data = data;
+  ProtobufCBinaryData packed;
+  packed.len = private_key__get_packed_size(&out);
+  packed.data = malloc(packed.len);
+  private_key__pack(&out, packed.data);
+
+  free_data(data);
+  return packed;
 
   free_and_stop:
     free_data(data);

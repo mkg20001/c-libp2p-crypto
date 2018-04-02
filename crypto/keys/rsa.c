@@ -2,8 +2,10 @@
 #include <crypto/util.h>
 #include <memory.h>
 
-#define PEM_PREFIX "-----BEGIN RSA PRIVATE KEY-----\n"
-#define PEM_SUFFIX "\n-----END RSA PRIVATE KEY-----"
+#define PEM_PRIVATE_PREFIX "-----BEGIN RSA PRIVATE KEY-----\n"
+#define PEM_PRIVATE_SUFFIX "\n-----END RSA PRIVATE KEY-----"
+#define PEM_PUBLIC_PREFIX "-----BEGIN RSA PUBLIC KEY-----\n"
+#define PEM_PUBLIC_SUFFIX "\n-----END RSA PUBLIC KEY-----"
 
 /* --- PKCS1 <-> PEM --- */
 
@@ -13,12 +15,29 @@ typedef enum _KeyLevel {
 } KeyLevel;
 
 RSA * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
+  char * pemPrefix;
+  char * pemSuffix;
+  switch(l) {
+    case KEY_PRIVATE: {
+      pemPrefix = PEM_PRIVATE_PREFIX;
+      pemSuffix = PEM_PRIVATE_SUFFIX;
+      break;
+    }
+    case KEY_PUBLIC: {
+      pemPrefix = PEM_PUBLIC_PREFIX;
+      pemSuffix = PEM_PUBLIC_SUFFIX;
+      break;
+    }
+    default: {
+      return NULL;
+    }
+  }
   const char * b64 = base64Encode(data);
-  char * str = malloc(strlen(PEM_PREFIX) + strlen(PEM_SUFFIX) + strlen(b64) + 1);
-  strcpy(str, PEM_PREFIX);
+  char * str = malloc(strlen(pemPrefix) + strlen(pemSuffix) + strlen(b64) + 1);
+  strcpy(str, pemPrefix);
   strcat(str, b64);
-  strcat(str, PEM_SUFFIX);
-  str[strlen(PEM_PREFIX) + strlen(PEM_SUFFIX) + strlen(b64)] = '\0';
+  strcat(str, pemSuffix);
+  str[strlen(pemPrefix) + strlen(pemSuffix) + strlen(b64)] = '\0';
   BIO * keybio = BIO_new_mem_buf((void*)str, -1);
   if (keybio == NULL) {
     free(str);
@@ -42,7 +61,62 @@ RSA * pkcs1_to_pem(ProtobufCBinaryData data, KeyLevel l) {
   return rsa;
 }
 
-ProtobufCBinaryData pem_to_pkcs1(BIO * bio) {
+ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
+  ProtobufCBinaryData data;
+  data.len = 0;
+  data.data = NULL;
+
+  if (l != KEY_PRIVATE && l != KEY_PUBLIC) return data;
+
+  BIO *bio;
+  BUF_MEM *bufferPtr;
+
+  bio = BIO_new(BIO_s_mem());
+
+  BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
+
+  switch(l) {
+    case KEY_PRIVATE: {
+      PEM_write_bio_RSAPrivateKey(bio, rsa, NULL, NULL, 0, NULL, NULL);
+      break;
+    }
+    case KEY_PUBLIC: {
+      PEM_write_bio_RSAPublicKey(bio, rsa);
+      break;
+    }
+  }
+
+  BIO_flush(bio);
+  BIO_get_mem_ptr(bio, &bufferPtr);
+  BIO_set_close(bio, BIO_NOCLOSE);
+  BIO_free_all(bio);
+
+  char * pem = (*bufferPtr).data;
+
+  char * pemPrefix;
+  char * pemSuffix;
+  switch(l) {
+    case KEY_PRIVATE: {
+      pemPrefix = PEM_PRIVATE_PREFIX;
+      pemSuffix = PEM_PRIVATE_SUFFIX;
+      break;
+    }
+    case KEY_PUBLIC: {
+      pemPrefix = PEM_PUBLIC_PREFIX;
+      pemSuffix = PEM_PUBLIC_SUFFIX;
+      break;
+    }
+  }
+
+  size_t len = strlen(pem) - (strlen(pemPrefix) + strlen(pemSuffix));
+
+  char * b64 = malloc(len + 1);
+  memcpy(b64, pem + strlen(pemPrefix), len);
+  b64[len] = '\0';
+
+  data = base64Decode(b64); // TODO: remove newlines from PEM_write* to fix this assert
+
+  return data;
 }
 
 /* --- unmarshal --- */
@@ -66,20 +140,20 @@ int rsa_unmarshal_private_key(ProtobufCBinaryData data, Libp2pPrivKey * out) { /
 
 int rsa_marshal_public_key(Libp2pPubKey * key, ProtobufCBinaryData out) {
   RSA *rsa = (RSA *) key->data;
-  char * buf = malloc(4096);
-  BIO * bp = BIO_new_mem_buf((void*)buf, -1);
-  PEM_write_bio_RSAPublicKey(bp, rsa);
-  ProtobufCBinaryData pem = pem_to_pkcs1(bp);
-  if (pem.data == NULL) return 1;
+  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PUBLIC);
+  if (pkcs1.data == NULL) return 1;
+  out.data = pkcs1.data;
+  out.len = pkcs1.len;
+  return 0;
 }
 
 int rsa_marshal_private_key(Libp2pPrivKey * key, ProtobufCBinaryData out) {
-  RSA *rsa = (RSA *) key->data;
-  char * buf = malloc(4096);
-  BIO * bp = BIO_new_mem_buf((void*)buf, -1);
-  PEM_write_bio_RSAPrivateKey(bp, rsa, NULL, NULL, 0, NULL, NULL);
-  ProtobufCBinaryData pem = pem_to_pkcs1(bp);
-  if (pem.data == NULL) return 1;
+  RSA * rsa = (RSA * ) key->data;
+  ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PRIVATE);
+  if (pkcs1.data == NULL) return 1;
+  out.data = pkcs1.data;
+  out.len = pkcs1.len;
+  return 0;
 }
 
 /* --- free --- */
