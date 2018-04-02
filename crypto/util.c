@@ -108,6 +108,19 @@ ProtobufCBinaryData base64Decode(char * base64) {
   return out;
 }
 
+size_t strip_newline(const char *input, char *result)
+{
+  size_t i;
+  size_t j = 0;
+  for (i = 0; input[i] != '\0'; i++) {
+    if (input[i] != 10) {
+      result[j++] = input[i];
+    }
+  }
+  result[j] = '\0';
+  return j;
+}
+
 void free_data(ProtobufCBinaryData data) {
   if (data.data != NULL) {
     free(data.data);

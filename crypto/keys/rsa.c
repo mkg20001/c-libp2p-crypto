@@ -114,7 +114,13 @@ ProtobufCBinaryData pem_to_pkcs1(RSA * rsa, KeyLevel l) {
   memcpy(b64, pem + strlen(pemPrefix), len);
   b64[len] = '\0';
 
-  data = base64Decode(b64); // TODO: remove newlines from PEM_write* to fix this assert
+  free(pem);
+  char * b64stripped = malloc(len);
+
+  strip_newline(b64, b64stripped);
+  free(b64);
+  data = base64Decode(b64stripped);
+  free(b64stripped);
 
   return data;
 }
