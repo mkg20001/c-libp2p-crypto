@@ -59,17 +59,21 @@ endforeach(proto_file)
 add_library(c_libp2p_crypto SHARED ${LIBP2P_CRYPTO_SRC_FULL})
 target_link_libraries(c_libp2p_crypto ${OPENSSL_LIBRARIES})
 
-include(gtest.cmake)
 
-set(TEST_FILES
-        test/crypto/aes.cpp
-        test/crypto/keys_rsa.cpp)
+if (NOT_BUILD_LIBP2P_CRYPTO_TESTS)
+else()
+    include(gtest.cmake)
 
-add_executable(crypto_test test/main.cpp ${TEST_FILES})
+    set(TEST_FILES
+            test/crypto/aes.cpp
+            test/crypto/keys_rsa.cpp)
 
-target_link_libraries(crypto_test
-        c_libp2p_crypto
-        libgtest
-        libgmock)
+    add_executable(crypto_test test/main.cpp ${TEST_FILES})
 
-install(TARGETS crypto_test DESTINATION bin)
+    target_link_libraries(crypto_test
+            c_libp2p_crypto
+            libgtest
+            libgmock)
+
+    install(TARGETS crypto_test DESTINATION bin)
+endif()
