@@ -144,21 +144,21 @@ int rsa_unmarshal_private_key(ProtobufCBinaryData data, Libp2pPrivKey * out) { /
 
 /* --- marshal --- */
 
-int rsa_marshal_public_key(Libp2pPubKey * key, ProtobufCBinaryData out) {
+int rsa_marshal_public_key(Libp2pPubKey * key, ProtobufCBinaryData * out) {
   RSA *rsa = (RSA *) key->data;
   ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PUBLIC);
   if (pkcs1.data == NULL) return 1;
-  out.data = pkcs1.data;
-  out.len = pkcs1.len;
+  out->data = pkcs1.data;
+  out->len = pkcs1.len;
   return 0;
 }
 
-int rsa_marshal_private_key(Libp2pPrivKey * key, ProtobufCBinaryData out) {
+int rsa_marshal_private_key(Libp2pPrivKey * key, ProtobufCBinaryData * out) {
   RSA * rsa = (RSA * ) key->data;
   ProtobufCBinaryData pkcs1 = pem_to_pkcs1(rsa, KEY_PRIVATE);
   if (pkcs1.data == NULL) return 1;
-  out.data = pkcs1.data;
-  out.len = pkcs1.len;
+  out->data = pkcs1.data;
+  out->len = pkcs1.len;
   return 0;
 }
 

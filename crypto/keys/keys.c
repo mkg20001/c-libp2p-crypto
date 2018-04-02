@@ -76,7 +76,7 @@ ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key) {
 
   switch(key->type) {
     case KEY_TYPE__RSA: {
-      err = rsa_marshal_public_key(key, data);
+      err = rsa_marshal_public_key(key, &data);
       break;
     }
     case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
@@ -102,7 +102,7 @@ ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key) {
 
   switch(key->type) {
     case KEY_TYPE__RSA: {
-      err = rsa_marshal_private_key(key, data);
+      err = rsa_marshal_private_key(key, &data);
       break;
     }
     case KEY_TYPE__Ed25519: case KEY_TYPE__Secp256k1: default: { // TODO: add those
