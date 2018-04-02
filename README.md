@@ -16,10 +16,10 @@ The libp2p-crypto library ported to C
      -  [ ] [`generateKeyPair(type, bits, callback)`](#generatekeypairtype-bits-callback)
      -  [ ] [`generateEphemeralKeyPair(curve, callback)`](#generateephemeralkeypaircurve-callback)
      -  [ ] [`keyStretcher(cipherType, hashType, secret, callback)`](#keystretcherciphertype-hashtype-secret-callback)
-     -  [ ] [`marshalPublicKey(key[, type], callback)`](#marshalpublickeykey-type-callback)
-     -  [ ] [`unmarshalPublicKey(buf)`](#unmarshalpublickeybuf)
-     -  [ ] [`marshalPrivateKey(key[, type])`](#marshalprivatekeykey-type)
-     -  [ ] [`unmarshalPrivateKey(buf, callback)`](#unmarshalprivatekeybuf-callback)
+     -  [x] [`marshalPublicKey(key[, type], callback)`](#marshalpublickeykey-type-callback)
+     -  [x] [`unmarshalPublicKey(buf)`](#unmarshalpublickeybuf)
+     -  [x] [`marshalPrivateKey(key[, type])`](#marshalprivatekeykey-type)
+     -  [x] [`unmarshalPrivateKey(buf, callback)`](#unmarshalprivatekeybuf-callback)
      -  [ ] [`import(pem, password, callback)`](#importpem-password-callback)
 
 ## API
@@ -74,3 +74,31 @@ if (aes_decrypt_final(ctx)) return NULL; // error
 unsigned char * decipher = aes_get_result(ctx->decRes);
 if (!strcmp((char *)plaintext, (char *)decipher)) return NULL; // input does not match output
 ```
+
+### `keys.h`
+
+> WIP
+
+###### `Libp2pPubKey * unmarshal_public_key(ProtobufCBinaryData data)`
+
+> Unmarshals a public key into a Libp2pPubKey struct
+
+###### `Libp2pPrivKey * unmarshal_private_key(ProtobufCBinaryData data)`
+
+> Unmarshals a private key into a Libp2pPrivKey struct
+
+###### `ProtobufCBinaryData marshal_public_key(Libp2pPubKey * key)`
+
+> Marshals a Libp2pPubKey struct into protobuf encoded binary data
+
+###### `ProtobufCBinaryData marshal_private_key(Libp2pPrivKey * key)`
+
+> Marshals a Libp2pPrivKey struct into protobuf encoded binary data
+
+###### `void free_public_key(Libp2pPubKey * key)`
+
+> Frees a Libp2pPubKey struct
+
+###### `void free_private_key(Libp2pPrivKey * key)`
+
+> Frees a Libp2pPrivKey struct
